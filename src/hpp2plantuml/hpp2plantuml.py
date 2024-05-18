@@ -125,7 +125,7 @@ class Container(object):
         container_str = self._render_container_def() + ' {\n'
         for member in self._member_list:
             container_str += '\t' + member.render() + '\n'
-        container_str += '}\n'
+        container_str += '}'
         return container_str
 
     def comparison_keys(self):
@@ -668,8 +668,7 @@ class ClassRelationship(object):
         child_str = self._render_name(self._child, self._child_namespace)
 
         # Link string
-        link_str += (parent_str + ' ' + self._render_link_type() + ' ' +
-                     child_str + '\n')
+        link_str += (parent_str + ' ' + self._render_link_type() + ' ' + child_str)
 
         return link_str
 
@@ -1418,7 +1417,7 @@ def wrap_namespace(input_str, namespace):
     return 'namespace {} {{\n'.format(namespace) + \
         '\n'.join([re.sub('^', '\t', line) if line else line
                    for line in input_str.splitlines()]) + \
-        '\n}\n'
+        '\n}'
 
 def get_namespace_link_name(namespace):
     """Generate namespace string for link
