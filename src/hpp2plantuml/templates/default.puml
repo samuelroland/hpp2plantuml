@@ -4,21 +4,21 @@
 {% endblock %}
 
 {% block objects %}
-/' Objects '/
+' Objects
 {% for object in objects %}
 {{ object.render() }}
 {% endfor %}
 {% endblock %}
 
 {% block inheritance %}
-/' Inheritance relationships '/
+' Inheritance relationships
 {% for link in inheritance_list %}
 {{ link.render() }}
 {% endfor %}
 {% endblock %}
 
 {% block aggregation %}
-/' Aggregation relationships '/
+' Aggregation relationships
 {% for link in aggregation_list %}
 {{ link.render() }}
 {% endfor %}
@@ -26,7 +26,7 @@
 {% if flag_dep %}
 {% block dependency %}
 
-/' Dependency relationships '/
+' Dependency relationships
 {% for link in dependency_list %}
 {{ link.render() }}
 {% endfor %}
@@ -34,10 +34,15 @@
 {% endif %}
 
 {% block nested %}
-/' Nested objects '/
+' Nested objects
 {% for link in nesting_list %}
 {{ link.render() }}
 {% endfor %}
 {% endblock %}
+
+' Free functions
+{% for note in notes %}
+{{ note }}
+{% endfor %}
 
 @enduml

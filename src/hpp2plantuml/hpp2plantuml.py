@@ -329,7 +329,7 @@ class ClassMember(ContainerMember):
     ``private`` or ``protected``) and a static flag.
 
     """
-    def __init__(self, class_member, member_scope='private'):
+    def __init__(self, class_member, member_scope='private', skip_visibility=True):
         """Constructor
 
         Parameters
@@ -344,6 +344,7 @@ class ClassMember(ContainerMember):
         self._static = class_member['static']
         self._scope = member_scope
         self._properties = []
+        self._skip_visibility = skip_visibility
 
     def render(self):
         """Get string representation of member
@@ -365,7 +366,7 @@ class ClassMember(ContainerMember):
             props = ' {' + ', '.join(self._properties) + '}'
         else:
             props = ''
-        vis = MEMBER_PROP_MAP[self._scope] + \
+        vis = ('' if self._skip_visibility else MEMBER_PROP_MAP[self._scope]) + \
               ('{static} ' if self._static else '')
         # static attribute already have {static} so don't include it again in type
         return_type = self._type.replace("static ", "") 
@@ -434,7 +435,7 @@ class ClassMethod(ClassMember):
     This class extends `ClassMember` for member methods.  It stores additional
     method properties (abstract, destructor flag, input parameter types).
     """
-    def __init__(self, class_method, member_scope):
+    def __init__(self, class_method, member_scope, skip_visibility=False):
         """Constructor
 
         The method name and additional properties are extracted from the parsed
@@ -455,7 +456,7 @@ class ClassMethod(ClassMember):
         assert isinstance(class_method,
                           CppHeaderParser.CppHeaderParser.CppMethod)
 
-        super().__init__(class_method, member_scope)
+        super().__init__(class_method, member_scope, skip_visibility)
         self._const = False
         self._friend = class_method['friend']   # hide this method if it is a friend
 
@@ -495,6 +496,7 @@ class ClassMethod(ClassMember):
                                for it in self._param_list) + ')'
 
         if self._friend:
+            # TODO: fix this!!
             return ""  # friend method do not belong to the class so do not include them
         return method_str
 
@@ -854,6 +856,7 @@ class Diagram(object):
         self._aggregation_list = []
         self._dependency_list = []
         self._nesting_list = []
+        self._free_functions = []
 
     def _sort_list(input_list):
         """Sort list using `ClassRelationship` comparison
@@ -1047,6 +1050,15 @@ class Diagram(object):
                             enum_c._name = obj_c.name + '::' + enum_c._name
                             self._objects.append(enum_c)
 
+        # Save a list of all free functions (not part of any class)
+        # Note: we skip when they are just friend reference because we would take it twice otherwise
+        for fn in parsed_header.functions:
+            # print(fn['name'], fn['debug'], fn['class'])
+            if fn['class'] == None and fn['friend'] == False:
+                # print(fn['filename'])
+                print(fn['debug'], fn['class'], fn['friend'])
+                self._free_functions.append(fn)
+
     def _make_class_list(self):
         """Build list of classes
 
@@ -1229,6 +1241,27 @@ class Diagram(object):
                     self._nesting_list.append(ClassNestingRelationship(
                         parent_obj, obj))
 
+    # Take free functions and create a big PlantUML note with all of them ordered by class
+    def build_free_functions_notes(self):
+        self._notes = []
+        note = "note \"Free functions \\n\\n\\\n"
+        # Render each function (like a method) as the final line
+        lines = []
+        for fn in self._free_functions:
+            lines.append(ClassMethod(fn, 'public', skip_visibility=True).render())
+        
+        # Sort and append each line in a note
+        lines.sort()
+        i = 0
+        for line in lines:
+            if i > 0:
+                note += " \\n\\\n"
+            note += line
+            i += 1
+        note += "\\\n\" as free_functions"
+
+        self._notes.append(note)
+
     def _augment_comp(self, c_dict, c_parent, c_child, rel_type='aggregation'):
         """Increment the aggregation reference count
 
@@ -1311,12 +1344,17 @@ class Diagram(object):
                 ns_obj_map[ns_parent].append(ns_obj_map[ns])
             else:
                 objects_out.append(ns_obj_map[ns])
+        
+        # Run notes generation
+        self.build_free_functions_notes()
+        
         # Render
         return template.render(objects=objects_out,
                                inheritance_list=self._inheritance_list,
                                aggregation_list=self._aggregation_list,
                                dependency_list=self._dependency_list,
                                nesting_list=self._nesting_list,
+                               notes=self._notes,
                                flag_dep=self._flag_dep)
 
 # %% Cleanup object type string
