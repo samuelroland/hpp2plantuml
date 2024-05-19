@@ -367,8 +367,12 @@ class ClassMember(ContainerMember):
             props = ''
         vis = MEMBER_PROP_MAP[self._scope] + \
               ('{static} ' if self._static else '')
+        # static attribute already have {static} so don't include it again in type
+        return_type = self._type.replace("static ", "") 
+        # Fix strange formatting of some return type (like std :: ostream&)
+        return_type = return_type.replace(" :: ", "::")
         member_str = vis + self._render_name() + \
-                     (' : ' + self._type if self._type else '') + \
+                     (' : ' + return_type if self._type != '' else '') + \
                      props
         return member_str
 
@@ -453,6 +457,7 @@ class ClassMethod(ClassMember):
 
         super().__init__(class_method, member_scope)
         self._const = False
+        self._friend = class_method['friend']   # hide this method if it is a friend
 
         self._type = _cleanup_type(class_method['returns'])
         if class_method['returns_pointer']:
@@ -466,8 +471,9 @@ class ClassMethod(ClassMember):
             self._const = True
         self._param_list = []
         for param in class_method['parameters']:
-            self._param_list.append([_cleanup_type(param['type']),
-                                     param['name']])
+            # Show "name: " if name is given + cleaned up return type
+            self._param_list.append([(param['name'] + ": " if param['name'] != '' else '') +_cleanup_type(param['type'])])
+        
 
     def _render_name(self):
         """Internal rendering of method name
@@ -488,6 +494,8 @@ class ClassMethod(ClassMember):
                      ', '.join(' '.join(it).strip()
                                for it in self._param_list) + ')'
 
+        if self._friend:
+            return ""  # friend method do not belong to the class so do not include them
         return method_str
 
 # %% Enum object
@@ -1504,6 +1512,7 @@ def main():
         CreatePlantUMLFile(args.input_files, args.output_file,
                            template_file=args.template_file,
                            flag_dep=args.flag_dep)
+    print("Generation done")
 
 # %% Standalone mode
 
