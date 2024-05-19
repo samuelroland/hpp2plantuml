@@ -452,6 +452,7 @@ class ClassMethod(ClassMember):
                           CppHeaderParser.CppHeaderParser.CppMethod)
 
         super().__init__(class_method, member_scope)
+        self._const = False
 
         self._type = _cleanup_type(class_method['returns'])
         if class_method['returns_pointer']:
@@ -462,7 +463,7 @@ class ClassMethod(ClassMember):
         if class_method['destructor']:
             self._name = '~' + self._name
         if class_method['const']:
-            self._properties.append('query')
+            self._const = True
         self._param_list = []
         for param in class_method['parameters']:
             self._param_list.append([_cleanup_type(param['type']),
@@ -483,7 +484,7 @@ class ClassMethod(ClassMember):
         assert not self._static or not self._abstract
 
         method_str = ('{abstract} ' if self._abstract else '') + \
-                     self._name + '(' + \
+                     self._name + ("_const" if self._const else "") + '(' + \
                      ', '.join(' '.join(it).strip()
                                for it in self._param_list) + ')'
 
