@@ -329,7 +329,7 @@ class ClassMember(ContainerMember):
     ``private`` or ``protected``) and a static flag.
 
     """
-    def __init__(self, class_member, member_scope='private', skip_visibility=True):
+    def __init__(self, class_member, member_scope='private', skip_visibility=False):
         """Constructor
 
         Parameters
@@ -496,7 +496,6 @@ class ClassMethod(ClassMember):
                                for it in self._param_list) + ')'
 
         if self._friend:
-            # TODO: fix this!!
             return ""  # friend method do not belong to the class so do not include them
         return method_str
 
