@@ -1055,11 +1055,11 @@ class Diagram(object):
 
         # Save a list of all free functions (not part of any class)
         # Note: we skip when they are just friend reference because we would take it twice otherwise
+        # Note: we skip .cpp file too because CppParser has a bug (even when this is a method, the fn['class'] attribute is None because return type is not correctly parsed in some case)
+        # this bug makes all methods considered as free functions... even if I don't parse .cpp files, I put this protection here just in case someone doesn't know it
         for fn in parsed_header.functions:
-            # print(fn['name'], fn['debug'], fn['class'])
-            if fn['class'] == None and fn['friend'] == False:
-                # print(fn['filename'])
-                print(fn['debug'], fn['class'], fn['friend'])
+            if fn['class'] == None and fn['friend'] == False and not fn['filename'].endswith('.cpp'):
+                print("Detected free function: " + fn['debug'])
                 self._free_functions.append(fn)
 
     def _make_class_list(self):
