@@ -1156,6 +1156,10 @@ class Diagram(object):
             if child_class in variable_type_list.keys():
                 var_types = variable_type_list[child_class]
                 for var_type in var_types:
+                    # If the member is a static member, we don't want to include any link
+                    if 'static ' in var_type:
+                        continue
+                    
                     for parent in class_list or parent in class_list_ns:
                         if re.search(r'\b' + parent + r'\b', var_type):
                             rel_type = 'composition'
@@ -1247,6 +1251,10 @@ class Diagram(object):
     # Take free functions and create a big PlantUML note with all of them ordered by class
     def build_free_functions_notes(self):
         self._notes = []
+        # Stop here if there is nothing to list
+        if len(self._free_functions) == 0:
+            return
+
         note = "note \"Free functions \\n\\n\\\n"
         # Render each function (like a method) as the final line
         lines = []
