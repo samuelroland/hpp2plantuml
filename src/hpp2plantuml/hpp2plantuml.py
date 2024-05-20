@@ -373,7 +373,7 @@ class ClassMember(ContainerMember):
             props = ' {' + ', '.join(self._properties) + '}'
         else:
             props = ''
-        vis = ('' if self._skip_visibility else MEMBER_PROP_MAP[self._scope]) + \
+        vis = ('' if self._skip_visibility else MEMBER_PROP_MAP[self._scope] + ' ') + \
               ('{static} ' if self._static else '')
         # static attribute already have {static} so don't include it again in type
         return_type = self._type.replace("static ", "") 
