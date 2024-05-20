@@ -880,8 +880,8 @@ class Diagram(object):
         sorted using the `_sort_list` helper function.
         """
         self._objects.sort(key=lambda obj: obj.comparison_keys())
-        for obj in self._objects:
-            obj.sort_members()
+        # for obj in self._objects:
+        #     obj.sort_members()
         Diagram._sort_list(self._inheritance_list)
         Diagram._sort_list(self._aggregation_list)
         Diagram._sort_list(self._dependency_list)
@@ -1251,7 +1251,8 @@ class Diagram(object):
         # Render each function (like a method) as the final line
         lines = []
         for fn in self._free_functions:
-            lines.append(ClassMethod(fn, 'public', skip_visibility=True).render())
+            line = (fn['template'] + " " if fn['template'] != False else '') + ClassMethod(fn, 'public', skip_visibility=True).render()
+            lines.append(line)
         
         # Sort and append each line in a note
         lines.sort()
