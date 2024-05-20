@@ -329,7 +329,7 @@ class ClassMember(ContainerMember):
     ``private`` or ``protected``) and a static flag.
 
     """
-    def __init__(self, class_member, member_scope='private', skip_visibility=False):
+    def __init__(self, class_member, member_scope='private', skip_visibility=False, skip=False):
         """Constructor
 
         Parameters
@@ -342,6 +342,7 @@ class ClassMember(ContainerMember):
         super().__init__(class_member['name'])
         self._type = None
         self._static = class_member['static']
+        self._skip = skip
         self._scope = member_scope
         self._properties = []
         self._skip_visibility = skip_visibility
@@ -362,6 +363,12 @@ class ClassMember(ContainerMember):
             String representation of member
 
         """
+
+
+        # Allow skipping method entirely: useful for friend methods that do not belong to the class so we don't include them
+        if self._skip:
+            return "'"  # render as single quote (PlantUML comment) to avoid beeing an empty line
+
         if len(self._properties) > 0:
             props = ' {' + ', '.join(self._properties) + '}'
         else:
@@ -373,7 +380,7 @@ class ClassMember(ContainerMember):
         # Fix strange formatting of some return type (like std :: ostream&)
         return_type = return_type.replace(" :: ", "::")
         member_str = vis + self._render_name() + \
-                     (' : ' + return_type if self._type != '' else '') + \
+                     (': ' + return_type if self._type != '' else '') + \
                      props
         return member_str
 
@@ -456,9 +463,8 @@ class ClassMethod(ClassMember):
         assert isinstance(class_method,
                           CppHeaderParser.CppHeaderParser.CppMethod)
 
-        super().__init__(class_method, member_scope, skip_visibility)
+        super().__init__(class_method, member_scope, skip_visibility, skip=class_method['friend'])
         self._const = False
-        self._friend = class_method['friend']   # hide this method if it is a friend
 
         self._type = _cleanup_type(class_method['returns'])
         if class_method['returns_pointer']:
@@ -495,8 +501,6 @@ class ClassMethod(ClassMember):
                      ', '.join(' '.join(it).strip()
                                for it in self._param_list) + ')'
 
-        if self._friend:
-            return ""  # friend method do not belong to the class so do not include them
         return method_str
 
 # %% Enum object
