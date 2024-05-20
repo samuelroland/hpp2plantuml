@@ -14,6 +14,7 @@ To fit my teacher's needs or just making things prettier, I did a few changes to
 1. Skip friend references in class because they are not part of the class
 1. Do not sort class members so it's easier to read with the same order as in the code
 1. Show detected free functions logs and a message when generation is done
+1. Do not include any link between 2 classes when the related attribute is static
 
 **Known bugs**
 1. **Having an attribute with `{}` initialisation will ignore the attribute**: ex. `size_t number{}` will be missing in the diagram but `size_t number` is okay. This is a bug of CppParser.
