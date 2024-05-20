@@ -1360,10 +1360,17 @@ class Diagram(object):
         # Run notes generation
         self.build_free_functions_notes()
         
+        # Instead of inserting self._aggregation_list into the template
+        # as we need to change them, we prefer to not insert it (it would require removing it) but we suggest in CLI output as a starting point
+        
+        if len(self._aggregation_list) > 0:
+            print("\nHere is a suggestion of necessary associations to configure manually (don't forget ):")
+            for el in self._aggregation_list:
+                print(el.render())
+
         # Render
         return template.render(objects=objects_out,
                                inheritance_list=self._inheritance_list,
-                               aggregation_list=self._aggregation_list,
                                dependency_list=self._dependency_list,
                                nesting_list=self._nesting_list,
                                notes=self._notes,
@@ -1562,7 +1569,7 @@ def main():
         CreatePlantUMLFile(args.input_files, args.output_file,
                            template_file=args.template_file,
                            flag_dep=args.flag_dep)
-    print("Generation done")
+    print("\nGeneration done !")
 
 # %% Standalone mode
 

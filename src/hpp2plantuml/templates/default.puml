@@ -17,12 +17,7 @@
 {% endfor %}
 {% endblock %}
 
-{% block aggregation %}
-' Aggregation relationships
-{% for link in aggregation_list %}
-{{ link.render() }}
-{% endfor %}
-{% endblock %}
+
 {% if flag_dep %}
 {% block dependency %}
 
