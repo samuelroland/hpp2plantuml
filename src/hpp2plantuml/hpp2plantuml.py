@@ -1267,7 +1267,7 @@ class Diagram(object):
         for line in lines:
             if i > 0:
                 note += " \\n\\\n"
-            note += line
+            note += line.replace("\"", "<U+0022>")  # replace double quote with unicode equivalent
             i += 1
         note += "\\\n\" as free_functions"
 
