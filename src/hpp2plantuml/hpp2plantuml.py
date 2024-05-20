@@ -1059,7 +1059,6 @@ class Diagram(object):
         # this bug makes all methods considered as free functions... even if I don't parse .cpp files, I put this protection here just in case someone doesn't know it
         for fn in parsed_header.functions:
             if fn['class'] == None and fn['friend'] == False and not fn['filename'].endswith('.cpp'):
-                print("Detected free function: " + fn['debug'])
                 self._free_functions.append(fn)
 
     def _make_class_list(self):
@@ -1364,10 +1363,11 @@ class Diagram(object):
         # as we need to change them, we prefer to not insert it (it would require removing it) but we suggest in CLI output as a starting point
         
         if len(self._aggregation_list) > 0:
-            print("\nHere is a suggestion of necessary associations to configure manually (don't forget ):")
+            print("\nHere is a suggestion of associations to configure manually:")
             for el in self._aggregation_list:
                 print(el.render())
 
+        print("\nWARNING: a bug in CppParser ignores the attribute initialized with {} syntax like `int i{};`, use another syntax.")
         # Render
         return template.render(objects=objects_out,
                                inheritance_list=self._inheritance_list,
